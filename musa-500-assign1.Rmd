@@ -11,7 +11,65 @@ output:
         
 ---
 
-```{r setup, include=FALSE}
+## Introduction
+State the problem and the setting of the analysis (i.e., Philadelphia).
+
+Present either a brief review of the literature (use Google Scholar) or simply speculate as to why the predictors we’re using might be related with the response variable.
+
+***
+
+## Methods
+
+### Data Cleaning
+The original Philadelphia block group dataset has 1816 observations. We clean the data by removing the following block groups:
+
+1) Block groups where population < 40
+2) Block groups where there are no housing units
+3) Block groups where the median house value is lower than $10,000
+4) One North Philadelphia block group which had a very high median house value (over \$800,000) and a very low median household income (less than \$8,000)
+
+The final dataset contains 1720 block groups.
+
+### Exploratory Data Analysis
+State that you will examine the summary statistics and distributions of variables.
+
+Also state that as part of your exploratory data analysis, you will examine the correlations between the predictors.
+
+Explain what a correlation is, and provide the formula for the sample correlation coefficient r. Also mention the possible range of r values, and what correlation of 0 means.
+
+### Multiple Regression Analysis
+Describe the method of regression in several sentences. I.e., what is it used for, what does it do?
+
+State the equation for y for this problem. The equation should be in the form:
+𝑦=𝛽0+𝛽1𝑥1+⋯+𝛽𝑘𝑥𝑘+𝜀.
+However, in your report, instead of y and x1…xk, fill in the actual variable names (as in the regression example given above). Be sure to mention what βi’s and ε are as well.
+
+State and explain regression assumptions (e.g., linearity; independence of observations; normality of residuals; homoscedasticity; no multicollinearity).
+
+Mention the parameters that need to be estimated in multiple regression (σ2, β0 ,…, βk). State what σ2 is (you should have already talked about βi in (ii) above).
+
+Talk about the way of estimating the parameters. (Hint: present the equation on the slide ‘β Coefficient Estimation – Least Squares’ for multiple regression and briefly discuss what the equation does).
+
+Talk about the coefficient of multiple determination R2, and the adjusted R2. Present and explain the relevant formulas and all the terms that are used in the formulas.
+
+State the hypotheses you test. Specifically, talk about the F-ratio and the H0 and Ha associated with it, as well as the hypotheses you test about each of the βi’s (again, state H0 and Ha).
+
+### Additional Analyses
+Talk about stepwise regression – discuss what it does and its limitations
+
+Talk about k-fold cross-validation (mentioning that k = 5) – discuss what it is used for, describe how it is operationalized and mention that the RMSE is used to compare models (explain what the RMSE is and how it is calculated, presenting and describing any relevant formulas).
+
+### Tools
+The analyses and visualizations for this report have all been done in R.
+
+***
+
+## Results
+
+### Exploratory Results
+
+#### Setup
+```{r setup, include = F}
 
 library(tidyverse) #general
 library(sf) #spatial
@@ -32,8 +90,8 @@ knitr::opts_chunk$set(echo = T, messages = F, warning = F, error = F)
 
 ```
 
-## Import data
-
+#### Import data
+In order to complete this entire project in R (rather than using ArcGIS, too), we have chosen to use the shapefile of data, rather than the .csv. Below, we import the shapefile and use a custom function to apply log transformations to the relevant columns. The function checks whether there are zero values in each column and then applies the appropriate log transformation accordingly.
 ```{r import}
 reg_data = read_sf('C:/Users/Nissim/Desktop/Fall 2022/Spat Stats/ass_1_data_shp/RegressionData.shp')
 
@@ -65,7 +123,8 @@ reg_data = reg_data |>
 
 ```
 
-## Data Table
+#### Data Table
+Present and briefly talk about the table with summary statistics which includes the dependent variable and the predictors (i.e., mean, standard deviation).
 ```{r table setup}
 
 med_house_val = c("Median House Value", mean(reg_data$MEDHVAL), sd(reg_data$MEDHVAL))
@@ -91,12 +150,15 @@ colnames(table) = c("Variable", "Mean", "SD")
 
 table_out = table |>
         gt() |>
+        tab_header(
+          title = md("**Summary Statistics**")
+        ) |>
         tab_row_group(
-          label = 'Predictors',
+          label = md('**Predictors**'),
           rows = 2:5
         ) |>
         tab_row_group(
-          label = 'Dependent Variable',
+          label = md('**Dependent Variable**'),
           rows = 1
         )
 
@@ -105,8 +167,8 @@ table_out
 
 ```
 
-## Histograms
-
+#### Histograms
+Also state whether the variables are normal before and after the logarithmic transformation
 ```{r histograms}
  house_val = ggplot(reg_data) +
                 geom_histogram(aes(MEDHVAL)) +
@@ -148,8 +210,10 @@ table_out
   ggarrange(pct_bach, nbelpov, pct_vac, pct_sing)
 ```
 
-## Log Transform Histograms
+#### Log Transform Histograms
+Present the histograms of the transformed variables and clearly state whether you’re using the log-transformed or original variable in your regression.
 
+State that the other regression assumptions will be examined in a separate section below (Regression Assumption Checks).
 ```{r ln histograms}
  ln_house_val = ggplot(reg_data) +
                 geom_histogram(aes(ln_med_h_val)) +
@@ -191,10 +255,85 @@ table_out
   ggarrange(ln_pct_bach, ln_nbelpov, ln_pct_vac, ln_pct_sing)
 ```
 
-## Scatterplots
+#### Choropleth Maps
+Present the choropleth maps of the dependent variable and the predictors which you created.
+
+Refer to the maps in the text, and talk about the following:
+
+Which maps look similar? Which maps look different? That is, which predictors do you expect to
+be strongly associated with the dependent variable based on the visualization? Also, given your examination of the maps, are there any predictors that you think will be strongly inter-correlated? That is, do you expect severe multicollinearity to be an issue here? Discuss this in a paragraph.
+```{r choros}
+#lifted from lovelace: https://geocompr.robinlovelace.net/adv-map.html#faceted-maps
+tmap_mode("plot")
+
+tm_shape(reg_data) + 
+  tm_polygons(col = "ln_med_h_val", border.col = NA, lwd = 0, palette = "Blues", style = "jenks") + 
+  tm_layout(legend.position = c("right", "bottom"))
+
+facets = c("ln_pct_bach_more",
+           "ln_n_bel_pov_100",
+           "ln_pct_vacant",
+           "ln_pct_singles")
+
+tm_shape(reg_data) + 
+  tm_polygons(facets, border.col = NA, lwd = 0, palette = "Blues", style = "jenks") + 
+  tm_layout(legend.position = c("right", "bottom")) +
+  tm_facets(nrow = 2, sync = TRUE)
+
+```
+
+
+#### Correlation Matrix
+Present the correlation matrix of the predictors which you obtained from R.
+
+Talk about whether the correlation matrix shows that there is severe multicollinearity.
+
+Does the correlation matrix support your conclusions based on your visual comparison of predictor maps?
+```{r corrplot}
+#https://cran.r-project.org/web/packages/corrplot/vignettes/corrplot-intro.html
+corr_reg_data = reg_data |>
+                  st_drop_geometry() |>
+                  dplyr::select(
+                                PCTVACANT,
+                                PCTSINGLES,
+                                PCTBACHMOR,
+                                LNNBELPOV)
+
+corrplot(cor(corr_reg_data), method = "number", type = "lower", tl.col = "black", tl.cex = 0.75, number.cex = 1)
+```
+
+
+### Regression Results
+Present the regression output from R. Be sure that your output presents the parameter estimates (and associated standard errors, t-statistics and p-values), as well as the R2, the adjusted R2, and the relevant F-ratio and associated p-value.
+
+Referencing the regression output in (i) above, interpret the results as in the example included above this report outline.
+NOTE: YOUR DEPENDENT VARIABLE (AND SOME PREDICTORS) WOULD BE LOG-TRANSFORMED, UNLIKE IN THE EXAMPLE HERE. LOOK AT THE SLIDES FOR EXAMPLES OF INTERPRETING REGRESSION OUTPUT WITH LOG-TRANSFORMED VARIABLES.
+
+#### Regression
+```{r regression}
+lm = lm(MEDHVAL ~ PCTVACANT + PCTSINGLES + PCTBACHMOR + ln_n_bel_pov_100, data = reg_data)
+
+summary(lm)
+
+anova(lm)
+
+pred_vals = fitted(lm)
+
+resids = residuals
+
+stand_resids = rstandard(lm)
+
+lm_df = data.frame(reg_data$MEDHVAL, pred_vals, stand_resids) |>
+          rename(MEDHVAL = reg_data.MEDHVAL)
+```
+
+### Regression Assumption Checks
+First state that in this section, you will be talking about testing model assumptions and aptness. State that you have already looked at the variable distributions earlier.
+
+#### Scatterplots of Predictors
+Present scatter plots of the dependent variable and each of the predictors. State whether each of the relationships seems to be linear, as assumed by the regression model. [Hint: they will not look linear.]
 
 Question here: are we meant to be using the original predictors or the log-transformed columns? (See section 1b)
-
 ```{r scatter plots}
 
 
@@ -221,73 +360,53 @@ Question here: are we meant to be using the original predictors or the log-trans
   ggarrange(pct_bach_plot, nbelpov_plot, pct_vac_plot, pct_sing_plot)
 ```
 
-## Correlation Matrix
-```{r corrplot}
-#https://cran.r-project.org/web/packages/corrplot/vignettes/corrplot-intro.html
-corr_reg_data = reg_data |>
-                  st_drop_geometry() |>
-                  dplyr::select(
-                                PCTVACANT,
-                                PCTSINGLES,
-                                PCTBACHMOR,
-                                LNNBELPOV)
+#### Histogram of Standardized Residuals
+Present the histogram of the standardized residuals. State whether the residuals look normal.
+```{r hist stand_resids}
+#join lm_df back to reg_data to map stand_resids
+#I'm not sure there's an easy way to make sure the rows match, but it should be okay
+reg_data = left_join(reg_data, lm_df, by = "MEDHVAL")
 
-corrplot(cor(corr_reg_data), method = "number", type = "lower", tl.col = "black", tl.cex = 0.75, number.cex = 1)
+ggplot(reg_data) +
+  geom_histogram(aes(x = stand_resids)) +
+  theme_minimal()
 ```
 
-## Choropleth Maps
-
-```{r choros}
-#lifted from lovelace: https://geocompr.robinlovelace.net/adv-map.html#faceted-maps
-tmap_mode("plot")
-
-tm_shape(reg_data) + 
-  tm_polygons(col = "ln_med_h_val", border.col = NA, lwd = 0, palette = "Blues", style = "jenks") + 
-  tm_layout(legend.position = c("right", "bottom"))
-
-facets = c("ln_pct_bach_more",
-           "ln_n_bel_pov_100",
-           "ln_pct_vacant",
-           "ln_pct_singles")
-
-tm_shape(reg_data) + 
-  tm_polygons(facets, border.col = NA, lwd = 0, palette = "Blues", style = "jenks") + 
-  tm_layout(legend.position = c("right", "bottom")) +
-  tm_facets(nrow = 2, sync = TRUE)
-
-```
-
-## Regression
-```{r regression}
-lm = lm(MEDHVAL ~ PCTVACANT + PCTSINGLES + PCTBACHMOR + ln_n_bel_pov_100, data = reg_data)
-
-summary(lm)
-
-anova(lm)
-
-pred_vals = fitted(lm)
-
-resids = residuals
-
-stand_resids = rstandard(lm)
-
-lm_df = data.frame(reg_data$MEDHVAL, pred_vals, stand_resids) |>
-          rename(MEDHVAL = reg_data.MEDHVAL)
-
+#### Standardized Residual by Predicted Value Scatter Plot
+Present the ‘Standardized Residual by Predicted Value’ scatter plot. What conclusions can you draw from that? Does there seem to be heteroscedasticity? Do there seem to be outliers? Anything else? Discuss.
+```{r stand_resids scatter}
 ggplot(lm_df) +
   geom_point(aes(x = pred_vals, y = stand_resids)) +
   theme_minimal()
 ```
 
-## Stepwise Regression
+Mention what standardized residuals are.
+
+Referencing the maps of the dependent variable and the predictors that you presented earlier, state whether there seems to be spatial autocorrelation in your variables. That is, does it seem that the observations (i.e., block groups) are independent of each other? Briefly discuss.
+
+
+#### Histogram & Choropleth of SRRs
+Now, present the choropleth map of the standardized regression residuals. Do there seem to be any noticeable spatial patterns in them? That is, do they seem to be spatially autocorrelated?
+
+You will examine the spatial autocorrelation of the variables and residuals and run spatial regressions in the next assignment.
+```{r srrs}
+tm_shape(reg_data) + 
+  tm_polygons(col = "stand_resids", border.col = NA, lwd = 0, palette = "Blues", style = "jenks") + 
+  tm_layout(legend.position = c("right", "bottom"))
+```
+
+### Additional Models
+
+#### Stepwise Regression
+Present the results of the stepwise regression and state whether all 4 predictors in the original model are kept in the final model.
 ```{r stepwise}
 stepAIC(lm)
 
 anova(lm)
 ```
 
-
-## K-Fold Cross-Validation
+#### K-Fold Cross-Validation
+Present the cross-validation results – that is, compare the RMSE of the original model that includes all 4 predictors with the RMSE of the model that only includes PCTVACANT and MEDHHINC as predictors.
 ```{r k-fold}
 
 #----
@@ -331,17 +450,21 @@ print(cvlm_model_reduced)
 
 ```
 
-## Histogram & Choropleth of SRRs
-```{r srrs}
-#join lm_df back to reg_data to map stand_resids
-#I'm not sure there's an easy way to make sure the rows match, but it should be okay
-reg_data = left_join(reg_data, lm_df, by = "MEDHVAL")
+***
 
-ggplot(reg_data) +
-  geom_histogram(aes(x = stand_resids)) +
-  theme_minimal()
+## Discussion and Limitations
 
-tm_shape(reg_data) + 
-  tm_polygons(col = "stand_resids", border.col = NA, lwd = 0, palette = "Blues", style = "jenks") + 
-  tm_layout(legend.position = c("right", "bottom"))
-```
+### Recap
+Recap what you did in the paper and your findings. Discuss what conclusions you can draw, which variables were significant and whether that was surprising or not.
+
+### Quality of Model
+Talk about the quality of the model – that is, state if this is a good model overall (e.g., R2, F-ratio test), and what other predictors that we didn’t include in our model might be associated with our dependent variable.
+
+If you ran the stepwise regression, did the final model include all 4 predictors or were some dropped? What does that tell you about the quality of the model?
+
+If you used cross-validation, was the RMSE better for the 4 predictor model or the 2 predictor model?
+
+### Limitations of Model
+If you haven’t done that in the Results section, talk explicitly about the limitations of the model – that is, mention which assumptions were violated, and if applicable, how that may affect the model/parameter estimation/estimated significance.
+
+In addition, talk about the limitations of using the NBELPOV100 variable as a predictor – that is, what are some limitations of using the raw number of households living in poverty rather than a percentage?
