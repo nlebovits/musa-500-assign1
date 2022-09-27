@@ -228,7 +228,19 @@ corrplot(cor(corr_reg_data), method = "number", type = "lower", tl.col = "black"
 ## Choropleth Maps
 
 ```{r choros}
-mapview(reg_data, zcol = "LNMEDHVAL")
+#lifted from lovelace: https://geocompr.robinlovelace.net/adv-map.html#faceted-maps
+facets = c("ln_med_h_val", 
+           "ln_pct_bach_more",
+           "ln_n_bel_pov_100",
+           "ln_pct_vacant",
+           "ln_pct_singles")
+
+tmap_mode("plot")
+
+tm_shape(reg_data) + 
+  tm_polygons(facets, border.col = NA, lwd = 0, palette = "Blues", style = "jenks") + 
+  tm_layout(legend.position = c("right", "bottom")) +
+  tm_facets(nrow = 2, sync = TRUE)
 
 ```
 
