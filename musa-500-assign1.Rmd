@@ -319,7 +319,7 @@ print(cvlm_model)
 #rmse for reduced model (just PCTVACANT and MEDHHINC)
 lm_ii_reduced = trainControl(method = "cv", number = 5)
 
-cvlm_model_reduced = train(MEDHVAL ~ PCTVACANT + MEDHHINC, data = reg_data, method = "lm", trControl = lm_ii)
+cvlm_model_reduced = train(MEDHVAL ~ PCTVACANT + MEDHHINC, data = reg_data, method = "lm", trControl = lm_ii_reduced)
 
 print(cvlm_model_reduced)
 
