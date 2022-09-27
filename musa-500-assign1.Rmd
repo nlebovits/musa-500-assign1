@@ -17,6 +17,9 @@ library(glue) #for tables
 library(janitor) #to clean col names
 library(corrplot) #for easy correlation matrix
 library(tmap) #for choropleth maps
+library(MASS) #for stepwise regression
+library(DAAG) #for CVlm
+library(caret) #for a different attempt at cvlm
 
 
 knitr::opts_chunk$set(echo = F, messages = F, warning = F, error = F)
@@ -248,4 +251,88 @@ tm_shape(reg_data) +
 
 ```
 
+## Regression
+```{r regression}
+lm = lm(MEDHVAL ~ PCTVACANT + PCTSINGLES + PCTBACHMOR + ln_n_bel_pov_100, data = reg_data)
 
+summary(lm)
+
+anova(lm)
+
+pred_vals = fitted(lm)
+
+resids = residuals
+
+stand_resids = rstandard(lm)
+
+lm_df = data.frame(reg_data$MEDHVAL, pred_vals, stand_resids) |>
+          rename(MEDHVAL = reg_data.MEDHVAL)
+
+ggplot(lm_df) +
+  geom_point(aes(x = pred_vals, y = stand_resids)) +
+  theme_minimal()
+```
+
+## Stepwise Regression
+```{r stepwise}
+stepAIC(lm)
+
+anova(lm)
+```
+
+
+## K-Fold Cross-Validation
+```{r k-fold}
+
+#----
+#IGNORING THIS BC I RAN INTO ISSUES W THIS PACKAGE
+
+#RMSE for full model
+#cvlm_data = reg_data |>
+#              st_drop_geometry() |>
+#              dplyr::select(MEDHVAL,
+#                            PCTVACANT,
+#                            PCTSINGLES,
+#                            PCTBACHMOR,
+#                            ln_n_bel_pov_100)
+
+#CVlm(data = cvlm_data, form.lm = lm, m = 5)
+
+#class(lm)
+
+#CVlm(reg_data, form.lm = lm, m =5)
+
+#RMSE for model with only PCTVACANT and MEDHHINC
+#----
+
+
+#running into some weird errors with the DAAG cv.lm function
+#trying a different one
+
+#rmse for full model
+lm_ii = trainControl(method = "cv", number = 5)
+
+cvlm_model = train(MEDHVAL ~ PCTVACANT + PCTSINGLES + PCTBACHMOR + ln_n_bel_pov_100, data = reg_data, method = "lm", trControl = lm_ii)
+
+print(cvlm_model)
+
+#rmse for reduced model (just PCTVACANT and MEDHHINC)
+lm_ii_reduced = trainControl(method = "cv", number = 5)
+
+cvlm_model_reduced = train(MEDHVAL ~ PCTVACANT + MEDHHINC, data = reg_data, method = "lm", trControl = lm_ii)
+
+print(cvlm_model_reduced)
+
+```
+
+## Histogram & Choropleth of SRRs
+```{r srrs}
+#join lm_df back to reg_data to map stand_resids
+#I'm not sure there's an easy way to make sure the rows match, but it should be okay
+reg_data = left_join(reg_data, lm_df, by = "MEDHVAL")
+
+
+tm_shape(reg_data) + 
+  tm_polygons(col = "stand_resids", border.col = NA, lwd = 0, palette = "Blues", style = "jenks") + 
+  tm_layout(legend.position = c("right", "bottom"))
+```
