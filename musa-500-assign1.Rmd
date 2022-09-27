@@ -2,7 +2,13 @@
 title: "MUSA 500, Assignment #1"
 author: "Minwook Kang, Nissim Lebovits, Ann Zhang"
 date: "`r Sys.Date()`"
-output: html_document
+output: 
+  html_document:
+    toc: true
+    toc_float: true
+    number_sections: true
+    code_folding: hide
+        
 ---
 
 ```{r setup, include=FALSE}
@@ -22,7 +28,7 @@ library(DAAG) #for CVlm
 library(caret) #for a different attempt at cvlm
 
 
-knitr::opts_chunk$set(echo = F, messages = F, warning = F, error = F)
+knitr::opts_chunk$set(echo = T, messages = F, warning = F, error = F)
 
 ```
 
@@ -331,6 +337,9 @@ print(cvlm_model_reduced)
 #I'm not sure there's an easy way to make sure the rows match, but it should be okay
 reg_data = left_join(reg_data, lm_df, by = "MEDHVAL")
 
+ggplot(reg_data) +
+  geom_histogram(aes(x = stand_resids)) +
+  theme_minimal()
 
 tm_shape(reg_data) + 
   tm_polygons(col = "stand_resids", border.col = NA, lwd = 0, palette = "Blues", style = "jenks") + 
