@@ -16,9 +16,10 @@ library(gt) #for tables
 library(glue) #for tables
 library(janitor) #to clean col names
 library(corrplot) #for easy correlation matrix
+library(tmap) #for choropleth maps
 
 
-knitr::opts_chunk$set(echo = F, messages = F)
+knitr::opts_chunk$set(echo = F, messages = F, warning = F, error = F)
 
 ```
 
