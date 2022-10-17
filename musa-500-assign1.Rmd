@@ -23,7 +23,7 @@ knitr::opts_chunk$set(echo = T, cache = T, messages = F, warning = F, error = F)
 
 This study aims to examine the relationship between median house values and several neighborhood characteristics and establish a model for predicting median house values, with a geographic focus on Philadelphia. Tracing back to earlier models for house value prediction, in one of the influential work commissioned by the Department of Housing and Urban Development in Washington D.C., namely, Characteristic Prices of Housing in Fifty-nine Metropolitan Areas, we see the proposal of a hedonic model for predicting housing prices that has been widely adopted in later studies: 
 
-asdawdawdawdawdawdawdawdawdawdawdawd
+asdawdawdawdawdawdawdawdawdawdawdawd   AWDNAKJWDBAKJWDBKAJWDBJKAWBDKJWAB
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 
