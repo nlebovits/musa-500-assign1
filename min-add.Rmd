@@ -1,1 +1,16 @@
+#####------------------------------------------------------add-2022-10-18-min--------------------------------------------------------------#####
 
+## Exploratory Data Analysis
+
+
+Before we get into the regression analysis, we should've to check some of statistics about variables. First and foremost, we need to look the distribution of variables through histogram and check if it is normally distributed. when one or more variables are not normally distributed, we will transform them to prevent heteroscedasiticy, nonlinearity, and outliers.
+
+Correlation is a  standardized measure of the strength of the relationship between variables Known as $r$. $r(\hat{ρ})$ is the value of sample correlation coefficient in our sample, is a point estimate of the population correlation coefficient $ρ$. Pearson r is given by : 
+
+$$\hat{ρ} = r = Corr(x,y) = \frac{\sum_{i=1}^{n}(x_i -\bar{x})(y_i -\bar{y})}{\sqrt{\sum_{i=1}^{n}(x_i -\bar{x})^2}\sqrt{\sum_{i=1}^{n}(y_i -\bar{y})^2}}$$
+Here, $\bar{x}$ and $\bar{y}$ are values of the sample means of x and y. Values of r range between -1, which means perfect negative correlation, to 1, which means perfect positive correlation. A value of 0 indicates that there’s no linear association between x and y.
+
+In Multiple Regression, predictors should not be very strongly correlated with each other, which means no multicollinearity. Normally, multicollinearity is when $r>0.9$ or $r<-0.9$. Multicollinearity can lead to skewed or misleading results when a researcher or analyst attempts to determine how well each independent variable can be used most effectively to predict or understand the dependent variable in a statistical model.
+
+
+#####------------------------------------------------------add-2022-10-18-min--------------------------------------------------------------#####
