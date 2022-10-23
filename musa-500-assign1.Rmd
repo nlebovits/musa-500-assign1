@@ -11,144 +11,335 @@ output:
     theme: readable
     highlight: monochrome
     css: custom.css
+editor_options: 
+  markdown: 
+    wrap: 72
 ---
 
 ```{r setup, include=F}
 knitr::opts_chunk$set(echo = T, cache = T, messages = F, warning = F, error = F)
 ```
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            
 
 # Introduction
 
-This study aims to examine the relationship between median house values and several neighborhood characteristics and establish a model for predicting median house values, with a geographic focus on Philadelphia. Tracing back to earlier models for house value prediction, in one of the influential work commissioned by the Department of Housing and Urban Development in Washington D.C., namely, Characteristic Prices of Housing in Fifty-nine Metropolitan Areas, we see the proposal of a hedonic model for predicting housing prices that has been widely adopted in later studies: 
+This study aims to examine the relationship between median house values
+and several neighborhood characteristics. It will establish a model for
+predicting median house values, with a geographic focus on Philadelphia.
+Earlier models of house value prediction---especially the influential
+HUD report, *Characteristic Prices of Housing in Fifty-Nine Metropolitan
+Areas*---propose a hedonic model, which has been widely adopted and
+which we will use here.^[Stephen Malpezzi, Larry Ozanne, and Thomas Thibodaeu, Characteristic Prices of Housing in Fifty-nine Metropolitan Areas (Washington D.C.: Department of Housing and Urban Development: 1980).]
 
-asdawdawdawdawdawdawdawdawdawdawdawd
-QWDLQBWDKJQWDKJQBWJDKBQW
-QWLDQWJDBQWKDBQWKJDBQ
-QWJKBDKQJWBDKQWBDKJQWD
+$$R = f (S, N, C, t)$$ where
 
-AWDJAWBDKAJWBDKJAWBDKJAWBDJKAWBDKJABWD
+            
 
+    $R =$ rent or value, 
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    $S =$ structural characteristics, 
+
+    $N =$ neighborhood characteristics (including location),
+
+    $C =$ contract conditions (implicit and explicit), and
+
+    $t =$ time trend (accounting for inflation over time).
+
+In a subsequent study that looks at Place-to-place Housing Price Indexes
+and their determinants, the researchers utilized the log-linear form of
+the hedonic model,^[Stephen Malpezzi,  Gregory H. Chun, and Richard K. Green, “New Place-to-Place Housing Price Indexes for U.S. Metropolitan Areas, and Their Determinants,” Real Estate Economics 26, No. 2 (1998): 235-274. https://doi-org.proxy.library.upenn.edu/10.1111/1540-6229.00745] expressed as:
+
+$$\ln R = \beta_0 + S\beta_1 + N\beta_2 + L\beta_3 + C\beta_4 + \epsilon $$ where
+
+    $\ln R =$ the natural log of rent, 
+
+    $R, S, N, C =$ same as above,
+
+    $\beta_i =$ the hedonic regression coefficient, and 
+
+    $\epsilon$ = the residuals.
+
+\
+Since the researchers mentioned "four appealing characteristics" of the log-linear form, including mitigating a common form of heteroskedasticity,^[Malpezzi, Chun, and Green, “Place-to-Place Housing Price Index,” 238.] our study will also use the logarithmic transformation of some variables. 
+
+\
+
+Both studies identified and categorized structural, neighborhood, and contract characteristics as three separate groups. Nonetheless, the analysis primarily focused on the structural characteristics (e.g., the number of bedrooms) and oversimplified the variables in neighborhood characteristics (i.e., using a generic subjective rating of how "good" a neighborhood is instead of using more objective parameters). Given that previous studies largely focused on structural characteristics, we will adopt similar regression models to explore four neighborhood characteristics that were previously overlooked: 
+
+1)  the percentage of individuals with Bachelor's degrees or higher, 
+
+2)  the percentage of vacant houses, 
+
+3)  the number of households living in poverty, and 
+
+4)  the percentage of single family housing units.
+
+            
 
 # Methods
 
 ## Data Cleaning
 
-The original Philadelphia block group datasets has 1816 observations. We clean the data by removing the following block groups:
+The original Philadelphia block group dataset has 1816 observations. We
+clean the data by removing the following block groups:
 
-1) Block groups where population < 40 
-2) Block groups where there are no housing units
-3) Block groups where the median house value is lower than $10,000
-4) One North Philadelphia block group which had a very high median house value (over \$800,000) and a very low median household income (less than \$8,000)
+1)  Block groups where population \< 40
+2)  Block groups where there are no housing units
+3)  Block groups where the median house value is lower than \$10,000
+4)  One North Philadelphia block group which had a very high median
+    house value (over \$800,000) and a very low median household income
+    (less than \$8,000)
 
 The final dataset contains 1720 block groups.
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            
 
 ## Exploratory Data Analysis
-State that you will examine the summary statistics and distributions of variables.
 
-Also state that as part of your exploratory data analysis, you will examine the correlations between the predictors.
+Before we get into the regression analysis, we will perform basic exploratory analysis on our data. First and foremost, we will use histograms to check if our data are normally distributed. If any variables are not normally distributed, we will transform them to prevent heteroscedasiticy, nonlinearity, and outliers.
 
-Explain what a correlation is, and provide the formula for the sample correlation coefficient r. Also mention the possible range of r values, and what correlation of 0 means.
+Correlation, a astandardized measure of the strength of the relationship between variables, is known as $r$. Here, $r(\hat{ρ})$ is the value of the sample correlation coefficient for our sample, is a point estimate of the population correlation coefficient $ρ$. The Pearson correlation coefficient $r$ is given by : 
 
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+$$\hat{ρ} = r = Corr(x,y) = \frac{\sum_{i=1}^{n}(x_i -\bar{x})(y_i -\bar{y})}{\sqrt{\sum_{i=1}^{n}(x_i -\bar{x})^2}\sqrt{\sum_{i=1}^{n}(y_i -\bar{y})^2}}$$
+Here, $\bar{x}$ and $\bar{y}$ are values of the sample means of $x$ and $y$. Values of $r$ range between -1, which means perfect negative correlation, and 1, which means perfect positive correlation. A value of 0 indicates that there’s no linear association between $x$ and $y$.
+
+In multiple regression, predictors should not be very strongly correlated with each other, i.e., there should be no multicollinearity. Normally, multicollinearity is when $r > 0.9$ or $r < -0.9$. Multicollinearity can lead to skewed or misleading results when a researcher or analyst attempts to determine how well each independent variable can be used most effectively to predict or understand the dependent variable in a statistical model.
+
+
+            
 
 ## Multiple Regression Analysis
 
-&nbsp;&nbsp;&nbsp;&nbsp;
+    
 
-<u>**the method of regression**</u>
+### Method of Regression
 
-Multiple Linear Regression is used to examine the relationship between a variable of interest (dependent variable) and one or more explanatory variables. Goal of this method is to fit a linear relationship between a quantitative dependent variable $Y$ and a set of predictors $X_1,X_2,...,X_i$. This method allows us to calculate the amount by which dependent variable changes when a predictor variable changes by one unit. Similar to correlation, if an explanatory variable is a significant predictor of the dependent variable, it doesn’t imply that the explanatory variable is a cause of the dependent variable. Regression model is widely used in biological, behavioral and social sciences to explain possible relationships between variables.
+Multiple linear regression is used to examine the relationship between a
+variable of interest (the dependent variable) and one or more
+explanatory variables. The goal of this method is to fit a linear
+relationship between a quantitative dependent variable $Y$ and a set of
+predictors $X_1,X_2,...,X_i$. This method allows us to calculate the
+amount by which the dependent variable changes when a predictor variable
+changes by one unit. Similar to correlation, if an explanatory variable
+is a significant predictor of the dependent variable, it doesn't imply
+that the explanatory variable is a cause of the dependent variable.
+Regression models are widely used in biological, behavioral, and social
+sciences to explain possible relationships between variables.
 
-&nbsp;&nbsp;&nbsp;&nbsp;
+    
 
-<u>**the equation for this problem**</u>
+### Equation
 
-For this project the equation becomes
+For this project the equation is:
 
-<span style="font-size:84%">$$MEDHVAL\; =\; 𝛽_0\;+\;𝛽_1PCBACHMORE\;+\;𝛽_2NBELPOV100\;+\;𝛽_3PCTVACANT\;+\;𝛽_4PCTSINGLES\;+ε$$</span>  
+[$$MEDHVAL\; =\; 𝛽_0\;+\;𝛽_1PCBACHMORE\;+\;𝛽_2NBELPOV100\;+\;𝛽_3PCTVACANT\;+\;𝛽_4PCTSINGLES\;+ε$$]{style="font-size:84%"}
 
-Each independent variable will have its own slope coefficient which will indicate the relationship of that  particular predictor with the dependent variable, controlling for all other independent variables in the regression. The coefficient $𝛽_i$  of each predictor interpreted as the amount by which the dependent variable changes as the independent variable increases by one unit.
-For instance, $𝛽=0.5$ means that the dependent variable goes up by 0.5 units when the predictor goes up by 1 unit, holding all other predictors constant. The variable $ε$ is usually referred to as the residual or random error term in the model. Without $ε$, any observed values would fall exactly on the line, called the true regression line.
+Each independent variable will have its own slope coefficient, which
+will indicate the relationship of that particular predictor with the
+dependent variable, controlling for all other independent variables in
+the regression. The coefficient $𝛽_i$ of each predictor is interpreted
+as the amount by which the dependent variable changes as the independent
+variable increases by one unit. For instance, $𝛽=0.5$ means that the
+dependent variable goes up by 0.5 units when the predictor goes up by 1
+unit, holding all other predictors constant. The variable $ε$ is usually
+referred to as the residual or random error term in the model. Without
+$ε$, any observed values would fall exactly on the line, called the true
+regression line.
 
-<span style="font-size:84%">$$MEDHVAL\; =\; 	\hat{𝛽_0}\;+\;\hat{𝛽_1}PCBACHMORE\;+\;\hat{𝛽_2}NBELPOV100\;+\;\hat{𝛽_3}PCTVACANT\;+\;\hat{𝛽_4}PCTSINGLES\;$$</span> 
+[$$MEDHVAL\; =\;     \hat{𝛽_0}\;+\;\hat{𝛽_1}PCBACHMORE\;+\;\hat{𝛽_2}NBELPOV100\;+\;\hat{𝛽_3}PCTVACANT\;+\;\hat{𝛽_4}PCTSINGLES\;$$]{style="font-size:84%"}
 
-&nbsp;&nbsp;&nbsp;&nbsp;
+    
 
-<u>**regression assumptions**</u>
+### Regression Assumptions
 
-One of the important assumptions is that **Independent and dependent variables is always linear**. That is, if the value of the independent variable changes, the dependent variable must also change continuously. To check this assumption, most frequently draw Scatterplots between $y$ and each of the predictors $x$. If the relationship is not linear, variable transformation or polynomial regression could be one of other options.
+The first important assumption for linear regression is that the
+relationship between the **independent variable and each of the
+dependent variables is always linear**. That is, if the value of the
+independent variable changes, the dependent variable must also change
+continuously. To check this assumption, we draw scatterplots between $y$
+and each of the predictors $x$. If the relationship is not linear, we
+may choose to transform it, or use a polynomial regression.
 
-Second assumption is that **each observation and residual has to be independent**. It's called Homoscedasticity, the variance of the residuals $ε$ is constant regardless of the values of each $x$. That is, the residual by predicted plot and the residual by $X$ plot should show no systematic patterns that for different values of $X$. We can use scatterplots of standardized residuals against each predictor. Presence of heteroscedasticity often means that there is systematic under/over-prediction happening in the model. The inclusion of additional predictors, running a spatial regression may help reduce or eliminate heteroscedasticity.
+The second assumption is that **each observation and its residual have
+to be independent**. This is called homoscedasticity, and means that the
+variance of the residuals $ε$ is constant regardless of the values of
+each $x$. That is, the residual by predicted plot and the residual by
+$X$ plot should show no systematic patterns that for different values of
+$X$. To check this, we can use scatterplots of standardized residuals
+against each predictor. The occurrence of heteroscedasticity often means
+that there is systematic under/over-prediction happening in the model.
+The inclusion of additional predictors, or running a spatial regression,
+may help reduce or eliminate heteroscedasticity.
 
-**Normality of residuals** are important for point estimation, confidence intervals, and hypothesis tests only for small samples due to the Central Limit Theorem. But if we have a large sample size(>30), isn’t as important as some of other assumptions. By looking as the histogram of residuals, we can check they are whether normal or not. We are generally more likely to see normal residuals if the dependent variable is normal and the predictor variables are normal. Violations of normality of residuals might arise either because the dependent or independent variables are themselves non-normal, or the linearity assumptions violated. In such cases, a nonlinear transformation of variables might solve both problems. In some cases, the problem with the residual distribution is mainly due to one or two very large errors, so called Outliers. If they are merely errors or if they can be explained as unique events not likely to be repeated, then you may able to remove them.
+**The normality of residuals** is important for point estimation,
+confidence intervals, and hypothesis tests only for small samples due to
+the Central Limit Theorem. But if we have a large sample size (\>30), it
+isn't as important as some of other assumptions. By looking at the
+histogram of residuals, we can check whether they are normal or not. We
+are generally more likely to see normal residuals if the dependent
+variable is normal and the predictor variables are normal. Violations of
+normality of residuals might arise either because the dependent or
+independent variables are themselves non-normal, or the linearity
+assumptions violated. In such cases, a nonlinear transformation of
+variables might solve both problems. In some cases, the problem with the
+residual distribution is mainly due to one or two very large errors,
+called outliers. If they are merely errors or if they can be explained
+as unique events not likely to be repeated, then you may able to remove
+them.
 
-Predictor variables shouldn’t be strongly correlated with each other, that is **non-Multicollinearity**. If correlation between any pair of predictors r>0.8 or r<-0.8, we might have Multicollinearity. Better Ways of Testing for Multicollinearity is to claculate VIF(Variance Inflation Factor). The VIF for each predictor $i$ is defined as follows
+The third key assumption is **non-multicollinearity**, meaning that
+predictor variables shouldn't be strongly correlated with each other. If
+the correlation between any pair of predictors $r > 0.8$ or $r < -0.8$, we
+might have multicollinearity. A better way to test for multicollinearity
+is to calculate the Variance Inflation Factor (VIF). The VIF for each
+predictor $i$ is defined as follows
 
-<span style="font-size:84%">$$VIF_k = \frac{1}{1-R_i^2}$$</span> 
+[$$VIF_k = \frac{1}{1-R_i^2}$$]{style="font-size:84%"}
 
-VIF of 1 means that there is no correlation among the $i^{th}$ predictor and the remaining predictor variables. The general rule of thumb is that VIF exceeding 4 warrant further investigation, while VIF exceeding 10 are signs of serious multicollinearity requiring correction. 
+A VIF of 1 means that there is no correlation among the $i^{th}$
+predictor and the remaining predictor variables. The general rule of
+thumb is that a VIF exceeding 4 warrants further investigation, while a
+VIF exceeding 10 is a sign of serious multicollinearity requiring
+correction.
 
-&nbsp;&nbsp;&nbsp;&nbsp;
+    
 
-<u>**Parameters that need to be estimated in multiple regression**</u>
+### Parameters that need to be estimated in multiple regression
 
-Given $n$ observations on $y$, and $k$ predictors $x_1,x_2,...,x_k$, the estimates $\hat{𝛽_0}\;+\hat{𝛽_1}\;+\hat{𝛽_2}\;,...,\hat{𝛽_k}\;$ are chosen simultaneously to minimize to expression for the Error Sum of Squares, given by: 
+Given $n$ observations on $y$, and $k$ predictors $x_1,x_2,...,x_k$, the
+estimates $\hat{𝛽_0}\;+\hat{𝛽_1}\;+\hat{𝛽_2}\;,...,\hat{𝛽_k}\;$ are
+chosen simultaneously to minimize to expression for the Error Sum of
+Squares, given by:
 
-<span style="font-size:84%">$$SSE = \displaystyle\sum_{i=1}^{n}{ε^2} = \displaystyle\sum_{i=1}^{n}{(y-\hat{y})^2} = \displaystyle\sum_{i=1}^{n}{(y_i-\hat{𝛽_0}\;-\hat{𝛽_1}x_{1i}\;-\hat{𝛽_2}x_{2i}\;...-\;\hat{𝛽_k}x_{ki})^2}$$</span> 
+[$$SSE = \displaystyle\sum_{i=1}^{n}{ε^2} = \displaystyle\sum_{i=1}^{n}{(y-\hat{y})^2} = \displaystyle\sum_{i=1}^{n}{(y_i-\hat{𝛽_0}\;-\hat{𝛽_1}x_{1i}\;-\hat{𝛽_2}x_{2i}\;...-\;\hat{𝛽_k}x_{ki})^2}$$]{style="font-size:84%"}
 
-In Multiple Regression, with $n$ observations on $y$, and $k$ predictors $x_1,x_2,...,x_k$: <span style="font-size:84%">$σ^2 = MES(mean\;of\;squared\;error) = \frac{SSE}{n-(k+1)}$</span> 
+In Multiple Regression, with $n$ observations on $y$, and $k$ predictors
+$x_1,x_2,...,x_k$:
+[$σ^2 = MSE\;(mean\;of\;squared\;error) = \frac{SSE}{n-(k+1)}$]{style="font-size:84%"}
 
-&nbsp;&nbsp;&nbsp;&nbsp;
+    
 
-<u>**the way of estimating the parameters : OLS regression**</u>
+### Method of Estimating Parameters : OLS Regression
 
-multiple OLS regression requires us to estimate values for a critical set of parameters: a regression constant and one regression coefficient for each independent variable in our model. The regression constant tells us the predicted value of the dependent variable (DV, hereafter) when all of the independent variables (IVs, hereafter) equal 0. The unstandardized regression coefficient for each IV tells us how much the predicted value of the DV would change with a one-unit increase in the IV, when all other IVs are at 0. 
-OLS estimates these parameters by finding the values for the constant and coefficients that minimize the sum of the squared errors of prediction, i.e., the differences between a case’s actual score on the DV and the score we predict for them using actual scores on the IVs. A matrix of $β$ Coefficient, $\textrm{B}$ is given by <span style="font-size:84%">$$\textrm{B}\;=\;\textrm{(X´X)}^{-1}\textrm{(X´Y)}$$</span> $\textrm{Y}$ is an $N×1$ column matrix of cases’ scores on the DV, $\textrm{X}$ is an $N×(k+1)$ matrix of cases’ scores on the IVs (where the first column is a placeholder column of ones for the constant and the remaining columns correspond to each IV), $\textrm{B}$ is a $(k+1)×1$ column matrix containing the regression constant and coefficients.
+Multiple OLS regression requires us to estimate values for a critical
+set of parameters: a regression constant and one regression coefficient
+for each independent variable in our model. The regression constant
+tells us the predicted value of the dependent variable (DV, hereafter)
+when all of the independent variables (IVs, hereafter) equal 0. The
+unstandardized regression coefficient for each IV tells us how much the
+predicted value of the DV would change with a one-unit increase in the
+IV, when all other IVs are at 0. OLS estimates these parameters by
+finding the values for the constant and coefficients that minimize the
+sum of the squared errors of prediction, i.e., the differences between a
+case's actual score on the DV and the score we predict for them using
+actual scores on the IVs. A matrix of $β$ Coefficient, $\textrm{B}$ is
+given by
+[$$\textrm{B}\;=\;\textrm{(X´X)}^{-1}\textrm{(X´Y)}$$]{style="font-size:84%"}
+$\textrm{Y}$ is an $N×1$ column matrix of cases' scores on the DV,
+$\textrm{X}$ is an $N×(k+1)$ matrix of cases' scores on the IVs (where
+the first column is a placeholder column of ones for the constant and
+the remaining columns correspond to each IV), $\textrm{B}$ is a
+$(k+1)×1$ column matrix containing the regression constant and
+coefficients.
 
-&nbsp;&nbsp;&nbsp;&nbsp;
+    
 
-<u>**the coefficient of multiple determination R2, and the adjusted R2**</u>
+### Coefficient of Multiple Determination R2, and the Adjusted R2
 
-As in simple regression, <span style="font-size:84%">$SSE = \sum(y_i-\hat{y_i})^2$</span>, which in the multiple regression case can be written as: 
-<span style="font-size:84%">$$SSE = \sum(y_i-\hat{y_i})^2 = \sum{[(y_i-(\hat{𝛽_0}\;+\hat{𝛽_1}x_{1i}\;+\hat{𝛽_2}x_{2i}\;..._\;\hat{𝛽_k}x_{ki})]^2}$$</span> 
-In multiple regression, where k predictors and n observations. 
+As in simple regression,
+[$SSE = \sum(y_i-\hat{y_i})^2$]{style="font-size:84%"}, which in the
+multiple regression case can be written as:
+[$$SSE = \sum(y_i-\hat{y_i})^2 = \sum{[(y_i-(\hat{𝛽_0}\;+\hat{𝛽_1}x_{1i}\;+\hat{𝛽_2}x_{2i}\;..._\;\hat{𝛽_k}x_{ki})]^2}$$]{style="font-size:84%"}
+In multiple regression, with k predictors and n observations.
 
-<span style="font-size:84%">$$σ^2 = MES(mean\;of\;squared\;error) = \frac{SSE}{n-(k+1)} $$</span> 
+[$$σ^2 = MSE(mean\;of\;squared\;error) = \frac{SSE}{n-(k+1)} $$]{style="font-size:84%"}
 
-Also, as in simple regression, <span style="font-size:84%">$SST = \sum(y_i-\bar{y_i})^2$</span> and $R^2 = 1- \frac{SSE}{SST}$. As for the multiple regression, $R^2$ is the coefficient of multiple determination, or the proportion of variance in the model explained by all k predictors. Because extra predictors will generally increase $R^2$, it is typically adjusted for the number of predictors, it is called Adjusted $R^2$ 
-<span style="font-size:84%">$$R^2_{adj} = \frac{(n-1)R^2-k}{n-(k+1)}$$</span> 
+Also, as in simple regression,
+[$SST = \sum(y_i-\bar{y_i})^2$]{style="font-size:84%"} and
+$R^2 = 1- \frac{SSE}{SST}$. As for the multiple regression, $R^2$ is the
+coefficient of multiple determination, or the proportion of variance in
+the model explained by all k predictors. Because extra predictors will
+generally increase $R^2$, it is typically adjusted for the number of
+predictors, it is called Adjusted $R^2$
+[$$R^2_{adj} = \frac{(n-1)R^2-k}{n-(k+1)}$$]{style="font-size:84%"}
 
-&nbsp;&nbsp;&nbsp;&nbsp;
+    
 
-<u>**hypotheses test : F-ratio and T-test**</u>
+### Hypothesis Testing : F-Ratio and T-Test
 
-Before doing a hypothesis test for each individual predictor(t-test), we do a so-called model utility test, referred to as the F-ratio, which is testing the $H_o$(Null Hypothesis) that all coefficients in the model are zero versus $H_α$(Alternative Hypothesis) that at least 1 of the coefficients is not 0. That is, none of the independent variables is a significant predictor of the dependent variable, and it means our model is seriously wrong. In addition to F-test, a t-test(hypothesis test) is done for each predictor $i$. Most statisticians will only look at these t-tests for each individual predictor if F-test is significant. In particular, for each predictor $i$m $\frac{\hat{β_i}-β_i}{s_{\hat{β_i}}}$ has a t distribution with $ν = n \;– (k+1)$ degrees of freedom. A 95% Confidence interval for $β_i$ is calculated as $\hat{β_i}\;±\;t_{0.025,ν}*s_{\hat{β_i}}$. In general, if p-value for a certain independent variable is less than 0.05, we can reject the null hypothesis of $β=0$ that this particular predictor is not a significant predictor of the dependent variable for an $H_α$ of $β≠0$.
+Before doing a hypothesis test for each individual predictor (t-test),
+we do a so-called model utility test, referred to as the F-ratio, which
+tests the $H_o$ (null nypothesis) that all coefficients in the model are
+zero versus $H_α$ (alternative hypothesis) that at least 1 of the
+coefficients is not 0. That is, none of the independent variables is a
+significant predictor of the dependent variable, and it means our model
+is seriously wrong. In addition to an F-test, a t-test (hypothesis test)
+is done for each predictor $i$. Most statisticians will only look at
+these t-tests for each individual predictor if the F-test is
+significant. In particular, for each predictor $i$,
+$\frac{\hat{β_i}-β_i}{s_{\hat{β_i}}}$ has a t distribution with
+$ν = n \;– (k+1)$ degrees of freedom. A 95% confidence interval for
+$β_i$ is calculated as $\hat{β_i}\;±\;t_{0.025,ν}*s_{\hat{β_i}}$. In
+general, if the p-value for a certain independent variable is less than
+0.05, we can reject the null hypothesis of $β=0$ that this particular
+predictor is not a significant predictor of the dependent variable for
+an $H_α$ of $β≠0$.
 
-&nbsp;&nbsp;&nbsp;&nbsp;
+    
 
 ## Additional Analyses
 
-&nbsp;&nbsp;&nbsp;&nbsp;
+    
 
-<u>**Stepwise regression**</u>
+### Stepwise Regression
 
-Stepwise regression is data mining method which selects predictors based on some criteria like P-values below a certain threshold or smallest value of the Akaike Information Criterion (AIC), a measure of relative quality of statistical models. There is several limitation with it, first of all, final model is not guaranteed to be optimal in any specified sense. The procedure yields a single final model, although there are often several equally good models. Also, it does not take into account a researcher's knowledge about the predictors.
+Stepwise regression is a data mining method that selects predictors
+based on criteria such as p-values below a certain threshold or the
+smallest value of the Akaike Information Criterion (AIC), a measure of
+the relative quality of statistical models.
 
-&nbsp;&nbsp;&nbsp;&nbsp;
+Stepwise regression has several limitations. First, the final model is
+not guaranteed to be optimal in any specific sense. The procedure yields
+only a *single* final model, although there may be several equally first
+of all, final model is not guaranteed to be optimal in any specified
+sense. It also does not account for a researcher's knowledge about the
+predictors.
 
-<u>**Talk about k-fold cross-validation (mentioning that k = 5) – discuss what it is used for, describe how it is operationalized and mention that the RMSE is used to compare models (explain what the RMSE is and how it is calculated, presenting and describing any relevant formulas)**</u>
+### K-Fold Cross-Validation
 
-Imagine we have a data set with 1000 observations and are trying to fit the models using this data set. We use the training data set to “train” the regression models. For the model, we then take the 𝛽 coefficients that were estimated with the training data set and compute the predicted value $\hat{y_𝑖}$ and the residual $ε_i=y_i−\hat{y_i}$ for each observation i in the validation data set. We then repeat this for the test model. We then use the validation data set to calculate a statistic known as the Root Mean Square Error for both models(RMSE). Problems with this Approach is that The RMSE will depend on the observations that end up being in the training and validation data sets. If we repeat the process of randomly splitting the sample set into two parts, we will get a somewhat different estimate for the RMSE each time, and that may affect the selection of the best model. To solve this issue, We run k-fold Cross Validation test.
-It involves randomly dividing the set of observations into k groups or folds of equal size. The 1st fold is treated as a validation data set and the model is fitted on the remaining k-1 folds (training data set). The MSE is computed for the validation fold. This procedure is repeated k times; each time, a different fold is treated as the validation data set. This process results in k estimates of the MSE. The k-fold MSE estimate is computed by averaging the MSEs across the k folds. The k-fold RMSE is computed as the square root of that MSE. we can compare the RMSE values for different models and choose the model with the smallest RMSE as the best one.
+
+Imagine that we have a data set with 1000 observations and are trying to
+fit a model using this data set. We use the training data set to "train"
+the regression model. For the model, we then take the $𝛽$ coefficients
+that were estimated with the training data set and compute the predicted
+value $\hat{y_𝑖}$ and the residual $ε_i=y_i−\hat{y_i}$ for each
+observation $i$ in the validation data set. We then repeat this for the
+test model. For both models, we then use the validation data set to
+calculate a statistic known as the Root Mean Square Error (RMSE).
+
+The problem with this approach is that the RMSE depends on which
+observations have been randomly assigned to the training data set versus
+the validation data set. If we repeat the process of randomly splitting
+the sample set into two parts, we will get a somewhat different estimate
+for the RMSE each time, and that may affect the selection of the best
+model. To solve this issue, we run a k-fold cross-validation test. This
+test involves randomly dividing the set of observations into $k$ groups
+or folds of equal size. The 1st fold is treated as a validation data set
+and the model is fitted on the remaining $k-1$ folds (training data
+sets). The MSE is computed for the validation fold. This procedure is
+repeated $k$ times; each time, a different fold is treated as the
+validation data set. This process results in $k$ estimates of the MSE.
+The k-fold MSE estimate is computed by averaging the MSEs across the $k$
+folds. The k-fold RMSE is computed as the square root of that MSE. We
+can compare the RMSE values for different models and choose the model
+with the smallest RMSE as the best one. In our analysis below, we use
+$k = 5$.
 
 ## Tools
+
 The analyses and visualizations for this report have all been done in R.
+
 ```{r, include=F}
 
 library(tidyverse) #general
@@ -164,6 +355,8 @@ library(tmap) #for choropleth maps
 library(MASS) #for stepwise regression
 library(DAAG) #for CVlm
 library(caret) #for a different attempt at cvlm
+library(stargazer) # for cleaner reg tables
+
 
 ```
 
@@ -172,14 +365,21 @@ library(caret) #for a different attempt at cvlm
 ## Exploratory Results
 
 ### Import data
-In order to complete this entire project in R (rather than using ArcGIS, too), we have chosen to use the shapefile of data, rather than the .csv. Below, we import the shapefile and use a custom function to apply log transformations to the relevant columns. The function checks whether there are zero values in each column and then applies the appropriate log transformation accordingly.
+
+In order to complete this entire project in R (rather than using ArcGIS,
+too), we have chosen to use the shapefile of data, rather than the .csv.
+Below, we import the shapefile and use a custom function to apply log
+transformations to the relevant columns. The function checks whether
+there are zero values in each column and then applies the appropriate
+log transformation accordingly.
+
 ```{r import}
 
 #Nissim
-#reg_data = read_sf('C:/Users/Nissim/Desktop/Fall 2022/Spat Stats/ass_1_data_shp/RegressionData.shp')
+reg_data = read_sf('C:/Users/Nissim/Desktop/Fall 2022/Spat Stats/ass_1_data_shp/RegressionData.shp')
 
 #Min
-reg_data = read_sf('C:/Users/vestalk/Desktop/00_Upenn/20.Fall/03.MUSA 5000 Spatial Statistics and Data Analysis/Assignment/HW1/RegressionData.shp')
+#reg_data = read_sf('C:/Users/vestalk/Desktop/00_Upenn/20.Fall/03.MUSA 5000 Spatial Statistics and Data Analysis/Assignment/HW1/RegressionData.shp')
 
 
 #define a function to find zero values in columns
@@ -210,7 +410,9 @@ reg_data = reg_data |>
 ```
 
 ### Data Table
-Present and briefly talk about the table with summary statistics which includes the dependent variable and the predictors (i.e., mean, standard deviation).
+
+The table below summarizes the mean and standard deviation of the dependent variable (median house value) and four predictors. We can see that two predictors (percent with a Bachelors' degree and percent in single housing units) have standard deviations larger than their means, indicating a large variation in values. In the following sections (3.1.3 and 3.1.4), the data from this table are visualized in histograms.
+
 ```{r table setup, out.width= "100%"}
 
 med_house_val = c("Median House Value", mean(reg_data$MEDHVAL), sd(reg_data$MEDHVAL))
@@ -259,7 +461,9 @@ table_out
 ```
 
 ### Histograms
-Also state whether the variables are normal before and after the logarithmic transformation
+
+Figures 1a - 1e show the distribution of predictor variables before logarithmic transformation. We can see that both the dependent variable and four predictors are not normally distributed; all of them are positively skewed. To achieve normal distributions of the variables, we performed logarithmic transformations, shown in the following section.
+
 ```{r histograms}
  house_val = ggplot(reg_data) +
                 geom_histogram(aes(MEDHVAL)) +
@@ -347,9 +551,13 @@ Also state whether the variables are normal before and after the logarithmic tra
 ```
 
 ### Log Transform Histograms
-Present the histograms of the transformed variables and clearly state whether you’re using the log-transformed or original variable in your regression.
 
-State that the other regression assumptions will be examined in a separate section below (Regression Assumption Checks).
+Figures 2a - 2e show the distribution of our variables after logarithmic transformation. Log transformation helps to achieve a linear relationship between the dependent variables and independent variables (predictors) as well as normality of the residuals, both of which are important assumptions for regression.
+
+As is apparent in the figures, there is a high frequency of 0-values for the following log transformed variables: percent bachelor's degree (Fig. 2b), vacancy rate (Fig. 2d), and percent single house units (Fig. 2e). This is unhelpful for our regression model. On the other hand, the log transformed versions of median house value (Fig. 2a) and poverty level (Fig. 2c) are more normally distributed after the transformation. Hence, we choose to use the log transformed versions of median house value (our dependent variable) and poverty level (one of our predictors) while keeping other three predictors in their original form in our regression.
+
+In addition to 1) the linear relationship between dependent variables and predictors and 2) normality of residuals---which are achieved by log transformation---we will test several other regression assumptions later in Section 3.3. These are 3) homoscedasticity, 4) the independence of observations, 5) multicollinearity, and 6) that each predictor has at least 10 observations.
+
 ```{r ln histograms}
  ln_house_val = ggplot(reg_data) +
                 geom_histogram(aes(ln_med_h_val)) +
@@ -437,12 +645,13 @@ State that the other regression assumptions will be examined in a separate secti
 ```
 
 ### Choropleth Maps
-Present the choropleth maps of the dependent variable and the predictors which you created.
 
-Refer to the maps in the text, and talk about the following:
+Figures 3a - 3e depict the geographic distribution of our variables. Note that all five maps show the log transformed versions of our variables.
 
-Which maps look similar? Which maps look different? That is, which predictors do you expect to
-be strongly associated with the dependent variable based on the visualization? Also, given your examination of the maps, are there any predictors that you think will be strongly inter-correlated? That is, do you expect severe multicollinearity to be an issue here? Discuss this in a paragraph.
+By comparing the maps, we can see a noticeable similarity between log of median house value (Fig. 3a) and log of percent bachelor's degree (Fig. 3b), and an opposite pattern in the log of percent of vacant homes. The relationship between house values (Fig. 3a) and poverty levels (Fig. 3c) or single house units (Fig. 3e) is less clear based solely on the maps.
+
+Comparing the maps of the four predictor variables (Fig. 3b, 3c, 3d, and 3e), we see distinct patterns for each variable. It is unlikely that they are inter-correlated, and therefore unlikely that we have multi-collinearity.
+
 ```{r choros}
 #lifted from lovelace: https://geocompr.robinlovelace.net/adv-map.html#faceted-maps
 tmap_mode("plot")
@@ -482,13 +691,10 @@ tm_shape(reg_data) +
 
 ```
 
-
 ### Correlation Matrix
-Present the correlation matrix of the predictors which you obtained from R.
 
-Talk about whether the correlation matrix shows that there is severe multicollinearity.
+To further test for multi-collinearity, we have created a correlation correlation matrix of our predictor variables. The matrix suggests a weak correlation across predictors (correlation coefficients fall between -0.32 and 0.25), which means no pair of predictors is strongly correlated. Hence, the matrix shows that there is no severe multicollinearity, which aligns with our earlier observation of the choropleth maps.
 
-Does the correlation matrix support your conclusions based on your visual comparison of predictor maps?
 ```{r corrplot}
 #https://cran.r-project.org/web/packages/corrplot/vignettes/corrplot-intro.html
 corr_reg_data = reg_data |>
@@ -502,20 +708,29 @@ corr_reg_data = reg_data |>
 corrplot(cor(corr_reg_data), method = "number", type = "lower", tl.col = "black", tl.cex = 0.75, number.cex = 1)
 ```
 
-
 ## Regression Results
-Present the regression output from R. Be sure that your output presents the parameter estimates (and associated standard errors, t-statistics and p-values), as well as the R2, the adjusted R2, and the relevant F-ratio and associated p-value.
 
-Referencing the regression output in (i) above, interpret the results as in the example included above this report outline.
-NOTE: YOUR DEPENDENT VARIABLE (AND SOME PREDICTORS) WOULD BE LOG-TRANSFORMED, UNLIKE IN THE EXAMPLE HERE. LOOK AT THE SLIDES FOR EXAMPLES OF INTERPRETING REGRESSION OUTPUT WITH LOG-TRANSFORMED VARIABLES.
+Our model regressed the log of median house values (ln_med_h_val) on four predictors, namely, 
+
+1)  the percents of individual with bachelor's degrees or higher (PCBACHMORE), 
+2)  the number of households living below the poverty line (NBELPOV100), 
+3)  the percent of vacant houses (PCTVACANT), and 
+4)  the percent of single houses units (PCTSINGLES). 
+
+The regression output suggests significant relationships between median house value and each of the four predictors respectively (p < 0.001 for all predictors). Specifically, median house value is positively associated with the percent of individuals with a bachelor's degree or higher and with the percent of single houses. It is negatively associated with the number of households living in poverty and the percent of vacant houses.
+
+A one unit increase in the percent of vacant houses (β*1*), the percent of single house units (β*2*), the percent of individuals with a bachelor's degree or higher (β*3*), and the number of households living in poverty (β*4*) are respectively associated with a β*1=* \$ 578.91 decrease,  β*2* = \$ 754.91 increase, β*3* = 2051.89 increase, and β*4* = \$5681.22 decrease in median house values.
+
+That all four predictors have p-values of less than 0.001 suggests that, if there is actually no relationship between median home value and any of the four predictors, the probability of getting the aforementioned β*1* - β*4* coefficient estimates is less than 0.001. We can therefore reject $H0: β1 = 0$ for $Ha: β1 ≠ 0$, $H0: β2 = 0 for Ha: β2 ≠ 0$, $H0: β3 = 0 for Ha: β3 ≠ 0$, $H0: β4 = 0 for Ha: β4 ≠ 0$ (at most reasonable levels of $α = P$ (a Type I error)).
 
 ### Regression
+
 ```{r regression}
-lm = lm(MEDHVAL ~ PCTVACANT + PCTSINGLES + PCTBACHMOR + ln_n_bel_pov_100, data = reg_data)
+lm = lm(ln_med_h_val ~ PCTVACANT + PCTSINGLES + PCTBACHMOR + ln_n_bel_pov_100, data = reg_data)
 
-summary(lm)
+stargazer(lm, type = "text", title = "Linear Regression", align = TRUE)
 
-anova(lm)
+stargazer(anova(lm), type = "text", title = "Analysis of Variance", align = TRUE)
 
 pred_vals = fitted(lm)
 
@@ -523,37 +738,47 @@ resids = residuals
 
 stand_resids = rstandard(lm)
 
-lm_df = data.frame(reg_data$MEDHVAL, pred_vals, stand_resids) |>
-          rename(MEDHVAL = reg_data.MEDHVAL)
+lm_df = data.frame(reg_data$ln_med_h_val, pred_vals, stand_resids) |>
+          rename(ln_med_h_val = reg_data.ln_med_h_val)
 ```
 
 ## Regression Assumption Checks
-First state that in this section, you will be talking about testing model assumptions and aptness. State that you have already looked at the variable distributions earlier.
+
+In the earlier sections, we looked at statistical and geospatial distributions of our variables. This allowed us to partially check our regression assumptions, such as linearity, normality, and multi-collinearity. In this section, we conduct further testing to ensure other assumptions are met and our model is apt.
+
+As mentioned above, the regression assumptions that need to be checked include 
+
+1)  the linear relationship between the dependent variable and predictors, 
+2)  the normality of residuals, 
+3)  homoscedasticity, 
+4)  the independence of observations, 
+5)  the absence of multi-collinearity, and 
+6)  that each predictor has at least 10 observations.
 
 ### Scatterplots of Predictors
-Present scatter plots of the dependent variable and each of the predictors. State whether each of the relationships seems to be linear, as assumed by the regression model. [Hint: they will not look linear.]
 
-Question here: are we meant to be using the original predictors or the log-transformed columns? (See section 1b)
+The four scatterplots depict the relationship between the log of median home value and the four predictors. According to those plots, we can see that they do not present linear relationships. Therefore, our first assumption---that the relationship between the dependent variable and its predictors---is not met.
+
 ```{r scatter plots}
 
 
   pct_bach_plot = ggplot(reg_data) +
-                    geom_point(aes(x = MEDHVAL, 
+                    geom_point(aes(x = ln_med_h_val, 
                                    y = PCTBACHMOR)) +
                     theme_minimal()
   
   nbelpov_plot = ggplot(reg_data) +
-                    geom_point(aes(x = MEDHVAL, 
+                    geom_point(aes(x = ln_med_h_val, 
                                    y = NBelPov100)) +
                     theme_minimal()
   
   pct_vac_plot = ggplot(reg_data) +
-                    geom_point(aes(x = MEDHVAL, 
+                    geom_point(aes(x = ln_med_h_val, 
                                    y = PCTVACANT)) +
                     theme_minimal()
     
   pct_sing_plot = ggplot(reg_data) +
-                    geom_point(aes(x = MEDHVAL, 
+                    geom_point(aes(x = ln_med_h_val, 
                                    y = PCTSINGLES)) +
                     theme_minimal()
   
@@ -561,11 +786,13 @@ Question here: are we meant to be using the original predictors or the log-trans
 ```
 
 ### Histogram of Standardized Residuals
-Present the histogram of the standardized residuals. State whether the residuals look normal.
+
+Below, the histogram of standardized residuals confirms that they are normally distributed, so our second regression assumption is met.
+
 ```{r hist stand_resids}
 #join lm_df back to reg_data to map stand_resids
 #I'm not sure there's an easy way to make sure the rows match, but it should be okay
-reg_data = left_join(reg_data, lm_df, by = "MEDHVAL")
+reg_data = left_join(reg_data, lm_df, by = "ln_med_h_val")
 
 ggplot(reg_data) +
   geom_histogram(aes(x = stand_resids)) +
@@ -573,22 +800,21 @@ ggplot(reg_data) +
 ```
 
 ### Standardized Residual by Predicted Value Scatter Plot
-Present the ‘Standardized Residual by Predicted Value’ scatter plot. What conclusions can you draw from that? Does there seem to be heteroscedasticity? Do there seem to be outliers? Anything else? Discuss.
+
+This scatter plot of the standardized residuals by predicted value shows heteroscedasticity: as predicted values increases, the variance in the residuals increases as well. Since the regression model assumes homoscedasticity---that is, the variance of residuals does not change as predicted values change---our third assumption is not met.
+
 ```{r stand_resids scatter}
 ggplot(lm_df) +
   geom_point(aes(x = pred_vals, y = stand_resids)) +
   theme_minimal()
 ```
 
-Mention what standardized residuals are.
-
-Referencing the maps of the dependent variable and the predictors that you presented earlier, state whether there seems to be spatial autocorrelation in your variables. That is, does it seem that the observations (i.e., block groups) are independent of each other? Briefly discuss.
-
-
 ### Histogram & Choropleth of SRRs
-Now, present the choropleth map of the standardized regression residuals. Do there seem to be any noticeable spatial patterns in them? That is, do they seem to be spatially autocorrelated?
 
-You will examine the spatial autocorrelation of the variables and residuals and run spatial regressions in the next assignment.
+Systematic patterns in residual (should be random)
+
+The histogram and choropleth map below show systematic patterns in the residuals of our regression---that is, the residuals are spatially autocorrelated and therefore not random.
+
 ```{r srrs}
 tm_shape(reg_data) + 
   tm_polygons(col = "stand_resids", border.col = NA, border.alpha = 0.1, lwd = 0, palette = "Blues", style = "jenks") + 
@@ -597,16 +823,22 @@ tm_shape(reg_data) +
 
 ## Additional Models
 
-### Stepwise Regression
-Present the results of the stepwise regression and state whether all 4 predictors in the original model are kept in the final model.
-```{r stepwise}
-stepAIC(lm)
+In this section, we performed stepwise regression and k-fold cross validation. The stepwise regression allows us to analyze the significance of all four of our predictor variables. K-fold cross validation allows us to compare the root mean square error (RMSE) of our original model with four predictors to a new model with only two predictors.
 
-anova(lm)
+### Stepwise Regression
+
+The stepwise regression indicates that all four predictor variables have p-values below 0.05. This suggests that all four predictors are significant, so we will keep them in our final model. Note that the poverty level predictor is in its log-transformed form.
+
+```{r stepwise}
+stargazer(stepAIC(lm), type = "text", title = "StepAIC", align = TRUE)
+
+stargazer(anova(lm), type = "text", title = "Analysis of Variance", align = TRUE)
 ```
 
 ### K-Fold Cross-Validation
-Present the cross-validation results – that is, compare the RMSE of the original model that includes all 4 predictors with the RMSE of the model that only includes PCTVACANT and MEDHHINC as predictors.
+
+We performed cross-validation on both the original model with 4 predictors and a new model with only 2 predictors: percent of vacant units and median household income. By comparing the root mean squared error (RMSE) of two cross-validations, we can see that the original model has a smaller RMSE and is therefore the better of the two models.
+
 ```{r k-fold}
 
 #----
@@ -637,34 +869,59 @@ Present the cross-validation results – that is, compare the RMSE of the origin
 #rmse for full model
 lm_ii = trainControl(method = "cv", number = 5)
 
-cvlm_model = train(MEDHVAL ~ PCTVACANT + PCTSINGLES + PCTBACHMOR + ln_n_bel_pov_100, data = reg_data, method = "lm", trControl = lm_ii)
+cvlm_model = train(ln_med_h_val ~ PCTVACANT + PCTSINGLES + PCTBACHMOR + ln_n_bel_pov_100, data = reg_data, method = "lm", trControl = lm_ii)
 
-print(cvlm_model)
+stargazer(print(cvlm_model), type = "text", title = "StepAIC", align = TRUE)
 
 #rmse for reduced model (just PCTVACANT and MEDHHINC)
 lm_ii_reduced = trainControl(method = "cv", number = 5)
 
-cvlm_model_reduced = train(MEDHVAL ~ PCTVACANT + MEDHHINC, data = reg_data, method = "lm", trControl = lm_ii_reduced)
+cvlm_model_reduced = train(ln_med_h_val ~ PCTVACANT + MEDHHINC, data = reg_data, method = "lm", trControl = lm_ii_reduced)
 
-print(cvlm_model_reduced)
+stargazer(print(cvlm_model_reduced), type = "text", title = "StepAIC", align = TRUE)
 
 ```
 
-***
+------------------------------------------------------------------------
 
 # Discussion and Limitations
 
 ## Recap
-Recap what you did in the paper and your findings. Discuss what conclusions you can draw, which variables were significant and whether that was surprising or not.
+
+Recap what you did in the paper and your findings. Discuss what
+conclusions you can draw, which variables were significant and whether
+that was surprising or not.
 
 ## Quality of Model
-Talk about the quality of the model – that is, state if this is a good model overall (e.g., R2, F-ratio test), and what other predictors that we didn’t include in our model might be associated with our dependent variable.
 
-If you ran the stepwise regression, did the final model include all 4 predictors or were some dropped? What does that tell you about the quality of the model?
+Talk about the quality of the model -- that is, state if this is a good
+model overall (e.g., R2, F-ratio test), and what other predictors that
+we didn't include in our model might be associated with our dependent
+variable.
 
-If you used cross-validation, was the RMSE better for the 4 predictor model or the 2 predictor model?
+Overall, the $R^2$ value for the model (0.593) is high for the social sciences. 
+
+One major predictor that might improve the model is the bid rent curve. Given the "location, location, location" cliche, it would make sense to account for the distance from downtown to the centroid of each census tract. 
+
+-R^2 is .593, which is very good for the social sciences
+-Could probably be improved by accounting for spatial autocorrelation
+-Should probably also account for the crucial "location, location, location" cliche--maybe use the bid-rent model and factor in distance from downtown?
+
+If you ran the stepwise regression, did the final model include all 4
+predictors or were some dropped? What does that tell you about the
+quality of the model?
+
+If you used cross-validation, was the RMSE better for the 4 predictor
+model or the 2 predictor model?
 
 ## Limitations of Model
-If you haven’t done that in the Results section, talk explicitly about the limitations of the model – that is, mention which assumptions were violated, and if applicable, how that may affect the model/parameter estimation/estimated significance.
 
-In addition, talk about the limitations of using the NBELPOV100 variable as a predictor – that is, what are some limitations of using the raw number of households living in poverty rather than a percentage?
+As we saw in Section 3.3, a number of our regression assumptions were violated. First, the relationships between our dependent variable and the predictor variables were generally not linear; based on the scatterplots, only PCTVACANT seems to have a vaguely linear relationship to ln_med_h_val. Additionally, the scatterplot of predicted values compared to standardized residuals shows heteroscedasticity. Finally, our map of the standardized residuals shows signs of spatial autocorrelation, indicating systematic patterns in our data. All three of these issues undermine key assumptions of linear regression.
+
+If you haven't done that in the Results section, talk explicitly about
+the limitations of the model -- that is, mention which assumptions were
+violated, and if applicable, how that may affect the model/parameter
+estimation/estimated significance.
+
+
+An additional issue with the model is that we used the raw number of people below the poverty line per census tract. Because the predictor is a count and not a rate, it is spatially extensive, i.e., it depends on the total area of the census tract. This introduces statistical bias in the form of the modifiable areal unit problem (MAUP). Because we do not have the option to divide the area of analysis into equally-sized spatial units, our best bet is probably to use the poverty rate, which is spatially intensive, rather than the raw number of people in poverty.
