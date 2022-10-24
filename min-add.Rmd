@@ -14,3 +14,26 @@ In Multiple Regression, predictors should not be very strongly correlated with e
 
 
 #####------------------------------------------------------add-2022-10-18-min--------------------------------------------------------------#####
+
+
+##----------------------------------- min added 2022 10 23 -------------------------------------------##
+
+## Recap
+
+In the process of constructing the regression model, percent of vacant house and median house value, which had been scaled through log transformation of variables, was successfully transformed from skewed distribution to normal distribution, but we decided no to use log-transformation to other variables because it is zero-inflated. In addition, since other variables except the percent of vacant, do not have a linear relationship with logged median house value, it seems necessary to consider the regression model of the polynomial method. 
+
+According to the summary statistic of our regression model, every p-value associated with each independent variable is less than 0.01, it means that we can reject the null hypothesis that this particular predictor is not a significant predictor of the dependent variable. When we look at the sign and value of $\hat{β}$ for each predictor, percentage of the bachelor and more seems the most significant predictor. Because When percentage of vacant($\hat{β} = -0.019$), percentage of singles($\hat{β} = 0.003$), percent of bachelor and more($\hat{β} = 0.021$) changes 1 unit, median house value changes -1.88%($(e^{-0.019}-1)*100$), 0.3%($(e^{0.003}-1)*100$), 2.12%($(e^{0.021}-1)*100$), and when percentage of poverty($\hat{β} = -0.079$) changes 1%, median house value changes -0.07%($(1.01^{-0.079}-1)*100$). 
+
+## Quality of Model
+
+Talk about the quality of the model -- that is, state if this is a good
+model overall (e.g., R2, F-ratio test), and what other predictors that
+we didn't include in our model might be associated with our dependent
+variable.
+
+Overall, the $R^2$ value for the model (0.593) is high for the social sciences. One major predictor that might improve the model is the bid rent curve. Given the "location, location, location" cliche, it would make sense to account for the distance from downtown to the centroid of each census tract. 
+
+After Stepwise regression, all the predictors we used in the original model have remained in the final model, indicating that our variable selection has been well made. Comparing model of 4 predictor's RMSE(0.347) with model with 2 predictors RMSE(0.406), the 4 predicor model is better than the 2 predictor model. 
+
+##----------------------------------- min added 2022 10 23 -------------------------------------------##
+
