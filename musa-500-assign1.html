@@ -11,7 +11,7 @@
 
 <meta name="author" content="Minwook Kang, Nissim Lebovits, Ann Zhang" />
 
-<meta name="date" content="2022-10-22" />
+<meta name="date" content="2022-10-24" />
 
 <title>MUSA 500, Assignment #1</title>
 
@@ -1677,7 +1677,7 @@ div.tocify {
 
 <h1 class="title toc-ignore">MUSA 500, Assignment #1</h1>
 <h4 class="author">Minwook Kang, Nissim Lebovits, Ann Zhang</h4>
-<h4 class="date">2022-10-22</h4>
+<h4 class="date">2022-10-24</h4>
 
 </div>
 
@@ -1766,7 +1766,7 @@ exploratory analysis on our data. First and foremost, we will use
 histograms to check if our data are normally distributed. If any
 variables are not normally distributed, we will transform them to
 prevent heteroscedasiticy, nonlinearity, and outliers.</p>
-<p>Correlation, a astandardized measure of the strength of the
+<p>Correlation, a standardized measure of the strength of the
 relationship between variables, is known as <span class="math inline">\(r\)</span>. Here, <span class="math inline">\(r(\hat{ρ})\)</span> is the value of the sample
 correlation coefficient for our sample, is a point estimate of the
 population correlation coefficient <span class="math inline">\(ρ\)</span>. The Pearson correlation coefficient
@@ -3202,32 +3202,60 @@ models.</p>
 Limitations</h1>
 <div id="recap" class="section level2" number="4.1">
 <h2><span class="header-section-number">4.1</span> Recap</h2>
-<p>Recap what you did in the paper and your findings. Discuss what
-conclusions you can draw, which variables were significant and whether
-that was surprising or not.</p>
+<p>When constructing our regression model, we log transformed the
+predictor variables for percent house vacancy and for median house
+value, yielding normal distributions for both. However, we did not
+ultimately use the log-transformed versions in our regression model
+because they were zero-inflated. Additionally, other than the vacancy
+rate, the predictor variables did <em>not</em> exhibit linear
+relationships with the log of median house value. This indicates that we
+should consider a different regression model, such as the polynomial
+method.</p>
+<p>According to the summary statistics of our regression model, the
+p-values associated with each independent variable are less than 0.01.
+This means that we can reject the null hypothesis that each particular
+predictor is <em>not</em> a significant predictor of the dependent
+variable. When we look at the sign and value of <span class="math inline">\(\hat{β}\)</span> for each predictor, the variable
+for percent of the population with a bachelor’s degree or higher seems
+the most significant predictor. This is because when percent vacancy
+(<span class="math inline">\(\hat{β} = -0.019\)</span>), percent single
+housing units (<span class="math inline">\(\hat{β} = 0.003\)</span>),
+percent bachelor’s degree or higher (<span class="math inline">\(\hat{β}
+= 0.021\)</span>) changes 1 unit, median house value changes -1.88%
+(<span class="math inline">\((e^{-0.019}-1)*100\)</span>), 0.3% (<span class="math inline">\((e^{0.003}-1)*100\)</span>), 2.12% (<span class="math inline">\((e^{0.021}-1)*100\)</span>), and when the number
+of people below the poverty line (<span class="math inline">\(\hat{β} =
+-0.079\)</span>) changes 1%, median house value changes -0.07% (<span class="math inline">\((1.01^{-0.079}-1)*100\)</span>).</p>
 </div>
 <div id="quality-of-model" class="section level2" number="4.2">
 <h2><span class="header-section-number">4.2</span> Quality of Model</h2>
-<p>Talk about the quality of the model – that is, state if this is a
-good model overall (e.g., R2, F-ratio test), and what other predictors
-that we didn’t include in our model might be associated with our
-dependent variable.</p>
-<p>Overall, the <span class="math inline">\(R^2\)</span> value for the
-model (0.593) is high for the social sciences.</p>
-<p>One major predictor that might improve the model is the bid rent
-curve. Given the “location, location, location” cliche, it would make
-sense to account for the distance from downtown to the centroid of each
-census tract.</p>
-<p>-R^2 is .593, which is very good for the social sciences -Could
-probably be improved by accounting for spatial autocorrelation -Should
-probably also account for the crucial “location, location, location”
-cliche–maybe use the bid-rent model and factor in distance from
-downtown?</p>
-<p>If you ran the stepwise regression, did the final model include all 4
-predictors or were some dropped? What does that tell you about the
-quality of the model?</p>
-<p>If you used cross-validation, was the RMSE better for the 4 predictor
-model or the 2 predictor model?</p>
+<p>To evaluate our model, we can first conduct the Model Utility Test
+(F-Test / F-ratio) to look at the overall model, then use stepwise
+regression to look at each predictor. As included in the regression
+results shown in section 3.2, we have an F-ratio of 840.957 (called “F
+Statistic” in the table) that is statistically significant (with p &lt;
+0.01). A significant f-ratio helps us reject the null hypothesis that
+all coefficients are jointly zero, and suggests that at least one of the
+coefficients of the predictors is not zero. This is the important first
+step to show that our model is not completely doomed.</p>
+<p>Referring back to section 3.4.1 where we conducted the stepwise
+regression, we observe significance in all four predictors (with
+PCTSINGLES, PCTVACANT, and PCTBACHMOR in original form and poverty rate
+in log-transformed form). Therefore, in the final model, we included all
+four of the predictors. In addition, according to the result of k-fold
+cross-validation, our RMSE (root mean squared error) is lower for the
+model with all four predictor than the two-predictor model.</p>
+<p>Given regression results in section 3.2 and additional verification
+in section 3.4, we suggest that overall this is a solid model for the
+purpose of social science research (<span class="math inline">\(R^2\)</span> value of 0.662 is considered high in
+this field.)</p>
+<p>Indeed, given the original hedonic model referenced in our
+introduction, there are many more possible predictors. One major
+predictor that might improve the model is the bid rent curve. Given the
+“location, location, location” cliche, it would make sense to account
+for the distance from downtown to the centroid of each census tract.
+Some other significant predictors may fall into the category of
+“structural characteristics,” “contract conditions,” or “time
+trend.”</p>
 </div>
 <div id="limitations-of-model" class="section level2" number="4.3">
 <h2><span class="header-section-number">4.3</span> Limitations of
@@ -3241,10 +3269,6 @@ compared to standardized residuals shows heteroscedasticity. Finally,
 our map of the standardized residuals shows signs of spatial
 autocorrelation, indicating systematic patterns in our data. All three
 of these issues undermine key assumptions of linear regression.</p>
-<p>If you haven’t done that in the Results section, talk explicitly
-about the limitations of the model – that is, mention which assumptions
-were violated, and if applicable, how that may affect the
-model/parameter estimation/estimated significance.</p>
 <p>An additional issue with the model is that we used the raw number of
 people below the poverty line per census tract. Because the predictor is
 a count and not a rate, it is spatially extensive, i.e., it depends on
